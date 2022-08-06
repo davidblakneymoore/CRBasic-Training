@@ -1,0 +1,56 @@
+' Example Program 3
+
+' David Moore
+
+' August 8th, 2022
+
+
+' The Explanation
+
+' The goal of this program is to multiply a matrix of starting data by a scalar
+' (2). We will be introduced to matrices (2-dimensional data structures) and
+' nested 'for' loops.
+
+
+' The Public Variables
+
+Public Input_Matrix(10, 3) = {1, 11, 21, 2, 12, 22, 3, 13, 23, 4, 14, 24, 5, 15, 25, 6, 16, 26, 7, 17, 27, 8, 18, 28, 9, 19, 29, 10, 20, 30}
+' Rows are filled in first, so the first row of this matrix contains 1, 11, and
+' 21, and the first column contains 1, 2, 3, 4, 5, 6, 7, 8, 9, and 10.
+Public Output_Matrix(10, 3)
+
+
+' The Private Variables
+
+Dim i
+Dim j
+
+
+' The Data Tables
+
+DataTable (Data_Table_3, 1, -1)
+  DataInterval (0, 15, Sec, 10)
+  Sample (10 * 3, Input_Matrix(), FP2)
+  Sample (10 * 3, Output_Matrix(), FP2)
+  ' 2-dimensional data tables, like the ones this program is capable of
+  ' creating, cannot report matrices in 2 dimensions, so you'll see how they
+  ' represent matrices when we look at the resulting data table.
+EndTable
+
+
+' The Main Program
+
+BeginProg
+  Scan (1, Sec, 0, 0)
+    For i = 1 To 10
+      For j = 1 To 3
+        Output_Matrix(i, j) = 2 * Input_Matrix(i, j)
+      Next j
+    Next i
+    ' If we change the order of 'for' loops (making the 'for' loop that loops
+    ' through columns the outer 'for' loop and the one that loops through rows
+    ' the inner 'for' loop), will the program still function as we want it to?
+    CallTable Data_Table_3
+  NextScan
+EndProg
+

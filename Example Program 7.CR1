@@ -1,0 +1,55 @@
+' Example Program 7
+
+' David Moore
+
+' August 8th, 2022
+
+
+' The Explanation
+
+' In this program, we will measure pressure using a pressure transducer. This
+' type of sensor requires an excitation voltage and is read in differntial
+' mode.
+
+
+' The Wiring
+
+' Connect the green wire from the sap pressure sensor (which is connected to
+' pin 2 of the sap pressure sensor) to the 'DIFF 1 H' port. Connect the white
+' wire from the sap pressure sensor (which is connected to pin 4 of the sap
+' pressure sensor) to the 'DIFF 1 L' port. Connect the red wire from the
+' sap pressure sensor (which is connected to pin 1 of the sap pressure sensor)
+' to the 'SW12' port. Connect the black wire from the sap pressure sensor
+' (which is connected to pin 3 of the sap pressure sensor) to a 'G' port.
+
+
+' The Public Variables
+
+Public Raw_Pressure_Output ' Units: mV
+
+
+' The Data Tables
+
+DataTable (Data_Table_7, 1, -1)
+  DataInterval (0, 15, Sec, 10)
+  Average (1, Raw_Pressure_Output, FP2, False)
+EndTable
+
+
+' The Main Program
+
+BeginProg
+  Scan (1, Sec, 0, 0)
+    If (TimeIntoInterval (0, 5, Sec)) Then
+      SW12 (1)
+      ' We should add a delay between when the excitation starts and when the
+      ' measurements are made so the sensor has time to equilibrate before we
+      ' take the measurement.
+      Delay (0, 100, mSec)
+      VoltDiff (Raw_Pressure_Output, 1, mV250, 1, True, 0, _60Hz, 1.0, 0)
+      SW12 (0)
+    EndIf
+    CallTable Data_Table_7
+  NextScan
+EndProg
+
