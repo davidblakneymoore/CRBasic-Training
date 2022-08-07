@@ -90,6 +90,10 @@ Public Temperature(Number_of_Sap_Flow_Ports_to_Read) : Units Temperature() = ° 
 Public Raw_Moisture_Output(Number_of_Soil_Moisture_Ports_to_Read) : Units Raw_Moisture_Output() = mV
 Public Pressure(Number_of_Pressure_Ports_to_Read) : Units Pressure() = mV
 Public Moisture(Number_of_Soil_Moisture_Ports_to_Read) : Units Moisture() = m ^ 3 * m ^ -3
+' We can define the units in the program. Defining units doesn't affect the
+' program at all - it just causes the units to appear in the data table that is
+' generated. You can see the row of units in the data table after you download
+' it.
 
 
 ' The Private Variables
