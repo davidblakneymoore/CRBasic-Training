@@ -27,7 +27,8 @@
 ' on the datalogger to the 'COM EVEN L' port on the multiplexer. Connect the
 ' copper wires from the single-ended thermocouples to the single-ended ports on
 ' the multiplexer. Connect the constantan wires from the single-ended
-' thermocouples to the single-ended ground ports on the multiplexer.
+' thermocouples to the single-ended ground ports on the multiplexer. Make sure
+' the multiplexer is in '4X16' mode.
 
 
 ' The Constants
