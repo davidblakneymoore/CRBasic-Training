@@ -39,8 +39,8 @@ Const Use_Method_1 = True
 
 ' The Public Variables
 
-Public Panel_Temperature ' Units: ° C
-Public Temperature(Number_of_Multiplexer_Ports_to_Read) ' Units: ° C
+Public Panel_Temperature ' Units: Â° C
+Public Temperature(Number_of_Multiplexer_Ports_to_Read) ' Units: Â° C
 
 
 ' The Private Variables
@@ -52,7 +52,7 @@ Dim i
 
 DataTable (Data_Table_8, 1, -1)
   DataInterval (0, 15, Sec, 10)
-  Average (Number_of_Multiplexer_Ports_to_Read, Temperature, FP2, False)
+  Average (Number_of_Multiplexer_Ports_to_Read, Temperature(), FP2, False)
 EndTable
 
 
