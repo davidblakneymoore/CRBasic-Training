@@ -1,0 +1,103 @@
+' Example Program 8
+
+' David Moore
+
+' August 8th, 2022
+
+
+' The Explanation
+
+' In this program, we will use a multiplexer to read many thermocouples at
+' once. We'll go over two different ways to program multiplexer measurements.
+
+
+' The Wiring
+
+' Run a copper wire from the 'C1' port on the datalogger to the 'RES' port on
+' the multiplexer. Run a copper wire from the 'C2' port on the datalogger to
+' the 'CLK' port on the multiplexer. Run a copper wire from a 'G' port on the
+' datalogger to the 'GND' port on the multiplexer. Run a copper wire from a
+' '12V' port on the datalogger to the '12V' port on the multiplexer. Run a
+' copper wire from the 'SE 1' port on the datalogger to the 'COM ODD H' port on
+' the multiplexer. Run a copper wire from the 'SE 2' port on the datalogger to
+' the 'COM ODD L' port on the multiplexer. Run a constantan wire from a single-
+' ended ground port on the datalogger to the 'COM' ground port on the
+' multiplexer. Run a copper wire from the 'SE 3' port on the datalogger to the
+' 'COM EVEN H' port on the multiplexer. Run a copper wire from the 'SE 4' port
+' on the datalogger to the 'COM EVEN L' port on the multiplexer. Connect the
+' copper wires from the single-ended thermocouples to the single-ended ports on
+' the multiplexer. Connect the constantan wires from the single-ended
+' thermocouples to the single-ended ground ports on the multiplexer. Make sure
+' the multiplexer is in '4X16' mode.
+
+
+' The Constants
+
+Const Number_of_Multiplexer_Ports_to_Read = 12
+' 'Number_of_Multiplexer_Ports_to_Read' should be a multiple of 4.
+Const Use_Method_1 = True
+
+
+' The Public Variables
+
+Public Panel_Temperature ' Units: ° C
+Public Temperature(Number_of_Multiplexer_Ports_to_Read) ' Units: ° C
+
+
+' The Private Variables
+
+Dim i
+
+
+' The Data Tables
+
+DataTable (Data_Table_8, 1, -1)
+  DataInterval (0, 15, Sec, 10)
+  Average (Number_of_Multiplexer_Ports_to_Read, Temperature(), FP2, False)
+EndTable
+
+
+' The Main Program
+
+BeginProg
+  Scan (1, Sec, 0, 0)
+    If (TimeIntoInterval (0, 5, Sec)) Then
+      ' I'm including code for 2 different methods of multiplexing. The second
+      ' method is the method you'll need to use if you're trying to read more
+      ' than one type of sensor on a single multiplexer since you'll have to
+      ' start measuring sensors on a multiplexer port other than the first
+      ' port.
+      If (Use_Method_1 = True) Then
+        ' Instead of saying 'If (Use_Method_1 = True)', we could also just say
+        ' 'If (Use_Method_1)'.
+        PortSet (1, 1)
+        Delay (0, 100, mSec)
+        PanelTemp (Panel_Temperature, _60Hz)
+        i = 1
+        SubScan (0, uSec, Number_of_Multiplexer_Ports_to_Read)
+          PulsePort (2, 10000)
+          TCSe (Temperature(i), 4, mV2_5C, 1, TypeT, Panel_Temperature, True, 0, _60Hz, 1.0, 0)
+          i += 4
+          ' The code in the previous line is the same as saying i = i + 4.
+        NextSubScan
+        PortSet (1, 0)
+      EndIf
+      If (Use_Method_1 = False) Then
+        MuxSelect (2, 1, 20, 1, 1)
+        Delay (0, 100, mSec)
+        PanelTemp (Panel_Temperature, _60Hz)
+        i = 1
+        SubScan (0, uSec, Number_of_Multiplexer_Ports_to_Read)
+          TCSe (Temperature(i), 4, mV2_5C, 1, TypeT, Panel_Temperature, True, 0, _60Hz, 1.0, 0)
+          PulsePort (2, 10000)
+          ' Notice that in this method the 'PulsePort' command comes after the
+          ' 'TCSe' command.
+          i += 4
+        NextSubScan
+        PortSet (1, 0)
+      EndIf
+    EndIf
+    CallTable Data_Table_8
+  NextScan
+EndProg
+

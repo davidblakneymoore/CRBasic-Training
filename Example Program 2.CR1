@@ -1,0 +1,45 @@
+' Example Program 2
+
+' David Moore
+
+' August 8th, 2022
+
+
+' The Explanation
+
+' The goal of this program is to add 3 to a vector of starting data. Also, this
+' program will introduce us to 'for' loops and higher-dimensional data (we will
+' use vectors).
+
+
+' The Public Variables
+
+Public Input_Vector(10) = {1, 3, 3, 2, 12, 22, 3, 13, 23, 4}
+Public Output_Vector(10)
+
+
+' The Private Variables
+
+Dim i
+
+
+' The Data Tables
+
+DataTable (Data_Table_2, 1, -1)
+  DataInterval (0, 15, Sec, 10)
+  Sample (10, Input_Vector(), FP2)
+  Sample (10, Output_Vector(), FP2)
+EndTable
+
+
+' The Main Program
+
+BeginProg
+  Scan (1, Sec, 0, 0)
+    For i = 1 To 10
+      Output_Vector(i) = Input_Vector(i) + 3
+    Next i
+    CallTable Data_Table_2
+  NextScan
+EndProg
+

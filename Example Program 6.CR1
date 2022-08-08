@@ -1,0 +1,52 @@
+' Example Program 6
+
+' David Moore
+
+' August 8th, 2022
+
+
+' The Explanation
+
+' In this program, we will read 6 single-ended thermocouple measurements. We'll
+' read 3 measurements per probe and we'll measure 2 probes.
+
+
+' The Wiring
+
+' Connect the 6 copper wires to the first 6 single-ended ports (ports 'SE 1'
+' through 'SE 6'). Connect both constantan wires to single-ended ground ports.
+
+
+' The Constants
+
+Const Number_of_Probes = 2
+Const Number_of_Thermocouples_per_Probe = 3
+
+
+' The Public Variables
+
+Public Panel_Temperature ' Units: ° C
+Public Thermocouple_Temperature_Measurements(Number_of_Probes * Number_of_Thermocouples_per_Probe) ' Units: ° C
+
+
+' The Data Tables
+
+DataTable (Data_Table_6, 1, -1)
+  DataInterval (0, 5, Sec, 10)
+  Sample (Number_of_Probes * Number_of_Thermocouples_per_Probe, Thermocouple_Temperature_Measurements(), IEEE4)
+EndTable
+
+
+' The Main Program
+
+BeginProg
+  Scan (5, Sec, 0, 0)
+    ' To measure temperature with thermocouples, we need to know a reference
+    ' temperature (the temperature at the point where the voltage is measured).
+    ' That's why I included a panel temperature measurement here.
+    PanelTemp (Panel_Temperature, _60Hz)
+    TCSe (Thermocouple_Temperature_Measurements(), Number_of_Probes * Number_of_Thermocouples_per_Probe, mV2_5C, 1, TypeT, Panel_Temperature, True, 0, _60Hz, 1, 0)
+    CallTable Data_Table_6
+  NextScan
+EndProg
+

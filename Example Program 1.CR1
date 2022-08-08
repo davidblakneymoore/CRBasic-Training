@@ -1,0 +1,59 @@
+' Example Program 1
+
+' David Moore
+
+' August 8th, 2022
+
+
+' The Explanation
+
+' The goal of this program is to record the panel temperature, the voltage of
+' the big 12-V battery, and the voltage of the small, 3.6-V lithium-ion battery
+' that's inside the datalogger.
+
+
+' The Constants
+
+Const Time_Between_Measurements = 5 ' Units: s
+Const Data_Interval = 15 ' Units: s
+
+
+' The Public Variables
+
+Public Panel_Temperature
+Public Big_Battery_Voltage
+Public Small_Battery_Voltage
+
+
+' The Data Tables
+
+DataTable (Data_Table_1, 1, -1)
+  DataInterval (0, Data_Interval, Sec, -1)
+  ' The 'Sample' command stores the most recent value in the data table.
+  ' Another good option for the panel temperature measurements would be the
+  ' 'Average' command.
+  Sample (1, Panel_Temperature, FP2)
+  ' The 'Minimum' command stores the minimum value in the data table. We are
+  ' typically interested in the minimum battery voltages and not the averages,
+  ' although there are cases where this isn't true.
+  Minimum (1, Big_Battery_Voltage, FP2, False, False)
+  Minimum (1, Small_Battery_Voltage, FP2, False, False)
+EndTable
+
+
+' The Main Program
+
+BeginProg
+  Scan (1, Sec, 0, 0)
+    ' If measurements are to be taken every time the scan happens, you don't
+    ' need to include an 'if' statement to specify how often to take
+    ' measurements.
+    If (TimeIntoInterval (0, Time_Between_Measurements, Sec)) Then
+      PanelTemp (Panel_Temperature, _60Hz)
+      Battery (Big_Battery_Voltage)
+      Small_Battery_Voltage = Status.LithiumBattery
+    EndIf
+    CallTable Data_Table_1
+  NextScan
+EndProg
+

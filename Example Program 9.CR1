@@ -1,0 +1,169 @@
+' Example Program 9
+
+' David Moore
+
+' August 8th, 2022
+
+
+' The Explanation
+
+' In this program, we will use one multiplexer to read several single-ended sap
+' flow thermocouples and several single-ended soil moisture sensors. We'll use
+' a second multiplexer to read several differential pressure transducers.
+' Finally, we'll do some data processing within the program as well.
+
+' To convert the raw soil moisture sensor output into actual moisture values, I
+' used a calibration equation found in the Meter Teros 10 manual
+' (http://publications.metergroup.com/Manuals/20788_TEROS10_Manual_Web.pdf).
+
+
+' The Wiring
+
+' Run a copper wire from the 'C1' port on the datalogger to the 'RES' port on
+' the first multiplexer. Run a copper wire from the 'C2' port on the datalogger
+' to the 'CLK' port on the first multiplexer. Run a copper wire from a 'G' port
+' on the datalogger to the 'GND' port on the first multiplexer. Run a copper
+' wire from a '12V' port on the datalogger to the '12V' port on the first
+' multiplexer. Run a copper wire from the 'SE 1' port on the datalogger to the
+' 'COM ODD H' port on the first multiplexer. Run a copper wire from the 'SE 2'
+' port on the datalogger to the 'COM ODD L' port on the first multiplexer. Run
+' a constantan wire from a single-ended ground port on the datalogger to the
+' 'COM' ground port on the first multiplexer. Run a copper wire from the 'SE 3'
+' port on the datalogger to the 'COM EVEN H' port on the first multiplexer. Run
+' a copper wire from the 'SE 4' port on the datalogger to the 'COM EVEN L' port
+' on the first multiplexer. Make sure the first multiplexer is in '4X16' mode.
+
+' Connect the copper wires from the single-ended sap flow thermocouples to the
+' first 24 single-ended ports on the first multiplexer. Connect the constantan
+' wires from the single-ended sap flow thermocouples to the single-ended ground
+' ports on the first multiplexer.
+
+' Connect the orange wires from the soil moisture sensors to single-ended ports
+' 25 through 48 on the first multiplexer. Connect the bare wires from the soil
+' moisture sensors to the single-ended ground ports on the first multiplexer.
+' Connect the brown wires from the soil moisture sensors to the 'SW12' port on
+' the datalogger (use a terminal block distribution module).
+
+' Run a wire from the 'C3' port on the datalogger to the 'RES' port on the
+' second multiplexer. Run a wire from the 'C4' port on the datalogger to the
+' 'CLK' port on the second multiplexer. Run a wire from a 'G' port on the
+' datalogger to the 'GND' port on the second multiplexer. Run a wire from a
+' '12V' port on the datalogger to the '12V' port on the second multiplexer. Run
+' a wire from the 'DIFF 3 H' port on the datalogger to the 'COM ODD H' port on
+' the second multiplexer. Run a copper wire from the 'DIFF 3 L' port on the
+' datalogger to the 'COM ODD L' port on the second multiplexer. Run a wire from
+' a differential ground port on the datalogger to the 'COM' ground port on the
+' second multiplexer. Make sure the second multiplexer is in '2X32' mode.
+
+' Connect the green wires from the pressure sensors (which are connected to pin
+' 2 of the pressure sensors) to the 'DIFF H' ports on the second multiplexer.
+' Connect the white wires from the pressure sensors (which are connected to pin
+' 4 of the pressure sensors) to the neighboring 'DIFF L' ports on the second
+' multiplexer. Connect the red wires from the pressure sensors (which are
+' connected to pin 1 of the pressure sensors) to the 'SW12' port on the
+' datalogger (use a terminal block distribution module). Connect the black
+' wires from the pressure sensors (which are connected to pin 3 of the pressure
+' sensors) to a 'G' port on the datalogger (again, use a terminal block
+' distribution module).
+
+' You can use the same terminal block distribution module (or the same terminal
+' block distribution module network) for both the moisture and the pressure
+' sensors - wire the 'A' terminals to the 'SW12' port and wire the 'B'
+' terminals to a 'G' port.
+
+
+' The Constants
+
+Const Number_of_Sap_Flow_Ports_to_Read = 24
+Const Number_of_Soil_Moisture_Ports_to_Read = 24
+' 'Number_of_Sap_Flow_Ports_to_Read' and
+' 'Number_of_Soil_Moisture_Ports_to_Read' should both be a multiple of
+' 4.
+Const Number_of_Pressure_Ports_to_Read = 10
+
+
+' The Public Variables
+
+Public Battery_Voltage : Units Battery_Voltage = V
+Public Panel_Temperature : Units Panel_Temperature = ° C
+Public Temperature(Number_of_Sap_Flow_Ports_to_Read) : Units Temperature() = ° C
+Public Raw_Moisture_Output(Number_of_Soil_Moisture_Ports_to_Read) : Units Raw_Moisture_Output() = mV
+Public Pressure(Number_of_Pressure_Ports_to_Read) : Units Pressure() = mV
+Public Moisture(Number_of_Soil_Moisture_Ports_to_Read) : Units Moisture() = m ^ 3 * m ^ -3
+
+
+' The Private Variables
+
+Dim i
+
+
+' The Data Tables
+
+DataTable (Data_Table_9, 1, -1)
+  DataInterval (0, 15, Sec, 10)
+  Minimum (1, Battery_Voltage, FP2, False, False)
+  Average (Number_of_Sap_Flow_Ports_to_Read, Temperature(), FP2, False)
+  Average (Number_of_Pressure_Ports_to_Read, Pressure(), FP2, False)
+  Average (Number_of_Soil_Moisture_Ports_to_Read, Moisture(), FP2, False)
+EndTable
+
+
+' The Main Program
+
+BeginProg
+  Scan (5, Sec, 0, 0)
+    ' I think the data interval (15 s in this program) should be a multiple of
+    ' the scan interval (5 s in this program). If it's not, you may not
+    ' actually take any measurements because the times won't always line up.
+    If (TimeIntoInterval (0, 15, Sec)) Then
+      ' Read the battery voltage.
+      Battery (Battery_Voltage)
+      ' Excite both the moisture and pressure sensors. It may be a good idea to
+      ' start the excitation voltage a little bit before the corresponding
+      ' measurements are taken to allow the sensors to equilibrate.
+      SW12 (1)
+      ' Record temperature measurements.
+      MuxSelect (2, 1, 20, 1, 1)
+      Delay (0, 100, mSec)
+      PanelTemp (Panel_Temperature, _60Hz)
+      i = 1
+      SubScan (0, uSec, Number_of_Sap_Flow_Ports_to_Read)
+        TCSe (Temperature(i), 4, mV2_5C, 1, TypeT, Panel_Temperature, True, 0, _60Hz, 1.0, 0)
+        PulsePort (2, 10000)
+        ' If you do not include a large enough delay for the 'PulsePort'
+        ' command, no data will be collected.
+        i += 4
+      NextSubScan
+      ' Record moisture measurements.
+      MuxSelect (2, 1, 20, Number_of_Sap_Flow_Ports_to_Read + 1, 1)
+      Delay (0, 100, mSec)
+      i = 1
+      SubScan (0, uSec, Number_of_Soil_Moisture_Ports_to_Read)
+        VoltSe (Raw_Moisture_Output(i), 4, mv5000, 1, 1, 10000, _60Hz, 1.0, 0)
+        PulsePort (2, 10000)
+        i += 4
+      NextSubScan
+      PortSet (1, 0)
+      ' Record pressure measurements.
+      MuxSelect (4, 3, 20, 1, 1)
+      Delay (0, 100, mSec)
+      i = 1
+      SubScan (0, uSec, Number_of_Pressure_Ports_to_Read)
+        VoltDiff (Pressure(i), 1, mV250, 3, True, 0, _60Hz, 1.0, 0)
+        PulsePort (4, 10000)
+        i += 1
+      NextSubScan
+      ' Turn the excitation off.
+      SW12 (0)
+      PortSet (3, 0)
+      ' Convert the raw moisture measurements into actual moisture values.
+      For i = 1 To Number_of_Pressure_Ports_to_Read
+        Moisture(i) = (0.0000000004824 * (Raw_Moisture_Output(i) ^ 3)) - (0.000002278 * (Raw_Moisture_Output(i) ^ 2)) + (0.003898 * Raw_Moisture_Output(i)) - 2.154
+        ' There is a bug in this software and you may have to write out
+        ' mathematical equations without spaces.
+      Next i
+    EndIf
+    CallTable Data_Table_9
+  NextScan
+EndProg
+

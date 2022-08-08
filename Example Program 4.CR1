@@ -1,0 +1,65 @@
+' Example Program 4
+
+' David Moore
+
+' August 8th, 2022
+
+
+' The Explanation
+
+' The goal of this program is to calculate basic moving averages starting with
+' known input data. We'll also extract the minimum and maximum values of this
+' known input data.
+
+
+' The Constants
+
+Const Moving_Average_Window = 3
+
+
+' The Public Variables
+
+Public Input_Vector(10) = {1, 3, 3, 2, 12, 22, 3, 13, 23, 4}
+Public Output_Vector(10 - Moving_Average_Window + 1)
+Public Minimum_Value(1, 2)
+Public Maximum_Value(1, 2)
+' Why are there 10 - Moving_Average_Window + 1 output values in this case?
+
+
+' The Private Variables
+
+Dim i
+
+
+' The Data Tables
+
+DataTable (Data_Table_4, 1, -1)
+  DataInterval (0, 15, Sec, 10)
+  Sample (10, Input_Vector(), FP2)
+  Sample (10 - Moving_Average_Window + 1, Output_Vector(), FP2)
+  Sample (1, Minimum_Value(), FP2)
+  Sample (1, Maximum_Value(), FP2)
+EndTable
+
+
+' The Main Program
+
+BeginProg
+  Scan (1, Sec, 0, 0)
+    For i = 1 To (10 - Moving_Average_Window + 1)
+      AvgSpa (Output_Vector(i), Moving_Average_Window, Input_Vector(i))
+    Next i
+    ' Be cautious - if you need to calculate moving averages of columns in a
+    ' matrix, you must first convert the matrix to a vector because the
+    ' 'AvgSpa' command can only take vectors as inputs. We won't do an example
+    ' of this operation together but I'll show you an example in a different
+    ' script later. The indexing for this is really tricky.
+    MinSpa (Minimum_Value(), 10, Input_Vector())
+    MaxSpa (Maximum_Value(), 10, Input_Vector())
+    ' I'm not sure why the 'MinSpa' and 'MaxSpa' commands return two things and
+    ' not just 1 - it might be a bug in the program - but the syntax I provide
+    ' here is what you should follow.
+    CallTable Data_Table_4
+  NextScan
+EndProg
+

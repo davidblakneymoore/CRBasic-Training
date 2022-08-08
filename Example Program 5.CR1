@@ -1,0 +1,43 @@
+' Example Program 5
+
+' David Moore
+
+' August 8th, 2022
+
+
+' The Explanation
+
+' The goal of this program is to perform simple voltage measurements with the
+' datalogger. We will measure the voltage across the '5V' and 'G' ports.
+
+
+' The Wiring
+
+' Run a wire from the '5V' port to the 'DIFF 1 H' port. Run another wire from
+' the 'G' port to the 'DIFF 1 L' port.
+
+
+' The Public Variables
+
+Public Port_5V_Voltage ' Units: mV
+
+
+' The Data Tables
+
+DataTable (Data_Table_5, 1, -1)
+  DataInterval (0, 5, Sec, 10)
+  Sample (1, Port_5V_Voltage, IEEE4)
+EndTable
+
+
+' The Main Program
+
+BeginProg
+  Scan (5, Sec, 0, 0)
+    ' This time we'll set the scan rate to 5 s. We'll also transfer the
+    ' measurements into the data table every 5 s.
+    VoltDiff (Port_5V_Voltage, 1, mv5000, 1, True, 0, _60Hz, 1.0, 0)
+    CallTable Data_Table_5
+  NextScan
+EndProg
+
